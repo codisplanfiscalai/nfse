@@ -59,7 +59,8 @@ class LocalPortalRuntime:
             finally:
                 sock.close()
             app = self.app_factory()
-            cfg = uvicorn.Config(app, host=self.host, port=port, log_level='warning', access_log=False, workers=1)
+            cfg = uvicorn.Config(app, host=self.host, port=port, log_level='warning', access_log=False,
+                                 workers=1, log_config=None)
             self.server = uvicorn.Server(cfg)
             self.thread = threading.Thread(target=self._run, daemon=True, name='CodisplanNFSe-HTTP')
             self.thread.start()
