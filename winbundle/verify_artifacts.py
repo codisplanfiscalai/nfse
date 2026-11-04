@@ -1,4 +1,4 @@
-"""Check Windows release ZIP manifests, SHA-256, and both native PE subsystems."""
+"""Check Windows GUI bundles, checksums and absence of SCM service."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -47,7 +47,8 @@ def verify(folder:Path,source_sha:str):
                 assert len(raw)==row['size'] and sha(raw)==row['sha256']
             assert json.loads(z.read('CodisplanNFSe/manifest.json'))==data
             verify_pe(z.read('CodisplanNFSe/CodisplanNFSe.exe'),arch,'gui')
-            verify_pe(z.read('CodisplanNFSe/CodisplanNFSeServico.exe'),arch,'service')
+            assert 'CodisplanNFSe/CodisplanNFSeServico.exe' not in members
+            assert data.get('service')=='integrated-tray-process'
             assert sha(z.read('CodisplanNFSe/_internal/assets/app.ico'))==data['identity']['icon_sha256']
             assert data['identity']['name']=='Codisplan NFS-e'
     assert found=={'x86','x64'},'Both architectures required'

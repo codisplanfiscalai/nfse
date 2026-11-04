@@ -10,7 +10,7 @@ def data_directory() -> Path:
     if configured:
         return Path(configured).expanduser().resolve()
     if sys.platform == "win32":
-        return Path(os.getenv("PROGRAMDATA", Path.home())) / "Codisplan" / "NFSe"
+        return Path(os.getenv("LOCALAPPDATA", Path.home())) / "Codisplan" / "NFSe"
     return Path.home() / ".local" / "share" / "codisplan-nfse"
 
 

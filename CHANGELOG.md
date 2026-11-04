@@ -2,7 +2,19 @@
 
 Este projeto segue [Semantic Versioning 2.0.0](https://semver.org/lang/pt-BR/).
 
-## [0.2.0] — em desenvolvimento
+## [0.3.0] — em desenvolvimento
+
+### Added
+- Nova identidade visual exclusiva Codisplan NFS-e (índigo/violeta/turquesa/âmbar), símbolo próprio e assets reproduzíveis SVG/ICO/PNG.
+- Servidor FastAPI integrado ao executável: inicialização automática no System Tray e gerenciamento de ciclo de vida pela GUI.
+- Testes de ciclo de vida HTTP, porta ocupada, reinicialização e integração Windows GUI no smoke test.
+
+### Fixed
+- Removida a exigência de instalar serviço Windows e os erros SCM 1060.
+- Botões Iniciar, Interromper, Reiniciar e Abrir portal funcionam sem CLI nem UAC.
+- Persistência local no perfil do usuário em LOCALAPPDATA.
+
+## [0.2.0] — versão anterior
 
 ### Added
 - Reimplementação da API ADN e dos relatórios em Python/FastAPI, com autenticação por certificado digital A1.
