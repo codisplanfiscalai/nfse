@@ -1,21 +1,25 @@
-# Build do painel Vue (imagem publica somente depois que o CI concluir testes).
-FROM node:22-alpine AS frontend
-WORKDIR /build
-COPY frontend/package*.json ./
-RUN npm install --no-audit --no-fund
-COPY frontend/ ./
-RUN npm run build
-
-FROM python:3.13-slim
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 CODISPLAN_HOST=0.0.0.0 \
-    CODISPLAN_DATA_DIR=/var/lib/codisplan-nfse CODISPLAN_REQUIRE_EXTERNAL_KEY=1
+FROM python:3.13.17-slim-bookworm AS runtime
+LABEL org.opencontainers.image.title="Codisplan NFS-e" \
+      org.opencontainers.image.source="https://github.com/codisplanfiscalai/nfse" \
+      org.opencontainers.image.description="Distribuição ADN e relatórios fiscais"
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 NFSE_DATA_DIR=/data
+ARG APP_VERSION=0.2.0
+ENV NFSE_VERSION=${APP_VERSION}
 WORKDIR /app
-COPY backend/requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt && useradd -r -u 11010 nfse \
-    && mkdir -p /var/lib/codisplan-nfse && chown nfse:nfse /var/lib/codisplan-nfse
-COPY backend/ /app/backend/
-COPY --from=frontend /build/dist /app/frontend/dist
-ENV PYTHONPATH=/app/backend
-USER nfse
+COPY requirements-server.txt .
+RUN python -m pip install --no-cache-dir -r requirements-server.txt
+COPY src/ src/
+COPY VERSION pyproject.toml ./
+RUN mkdir /data && chown 10001:10001 /data && chmod 700 /data
+USER 10001:10001
 EXPOSE 8765
-CMD ["python","/app/backend/run_server.py"]
+ENTRYPOINT ["python","-m","src.nfse.server"]
+
+FROM runtime AS test
+USER root
+RUN python -m pip install --no-cache-dir pytest==9.0.2
+USER 10001:10001
+COPY --chown=10001:10001 tests/ tests/
+RUN python -m pytest -q
+
+FROM runtime AS final
