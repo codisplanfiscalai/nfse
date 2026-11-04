@@ -1,13 +1,13 @@
 <div class="shell" :class="{signed:user}">
   <template v-if="!user">
     <div class="auth-layout">
-      <aside class="auth-side"><div class="auth-brand"><img src="/static/app.png" alt="" class="auth-icon"><span>Codisplan <strong>NFS-e</strong></span></div>
+      <aside class="auth-side"><div class="auth-brand"><img src="/static/app.png" alt="" class="auth-icon"><span><strong>NFS-e</strong> Codisplan</span></div>
         <div class="auth-message"><p class="eyebrow light">PLATAFORMA FISCAL</p><h1>Documentos e relatórios. Em um só lugar.</h1>
           <p>Sincronize documentos pelo Ambiente de Dados Nacional, acompanhe eventos e transforme XMLs em relatórios confiáveis.</p>
           <div class="auth-features"><span>◈ Integração com certificado digital</span><span>◈ Histórico fiscal rastreável</span><span>◈ Relatórios por competência</span></div>
         </div><div class="auth-bottom">CODISPLAN · TECNOLOGIA PARA CONTABILIDADE</div>
       </aside>
-      <main class="auth-main"><section class="auth-card"><img src="/static/logo.jpg" alt="Codisplan Contabilidade" class="login-logo"><p class="eyebrow">ACESSO SEGURO</p>
+      <main class="auth-main"><section class="auth-card"><img src="/static/brand-lockup.png" alt="Codisplan NFS-e" class="login-logo"><p class="eyebrow">ACESSO SEGURO</p>
         <h2>{{configured?'Entrar no painel':'Configurar administrador'}}</h2><p class="muted">{{configured?'Use suas credenciais de acesso à plataforma.':'Primeiro acesso: crie o administrador local.'}}</p>
         <form @submit.prevent="submitAuth" class="stack"><label v-if="!configured" class="field">Nome completo<input v-model="login.name" required autocomplete="name"></label>
           <label class="field">E-mail<input v-model="login.email" type="email" required autocomplete="username"></label>
@@ -20,7 +20,7 @@
   <template v-else>
     <div v-if="menuOpen" class="mobile-scrim" @click="menuOpen=false"></div>
     <aside class="sidebar" :class="{'open':menuOpen}">
-      <div class="sidebar-header"><img src="/static/app.png" alt="" class="brand-icon"><div><strong>Codisplan</strong><span>NFS-e • Administração</span></div><button class="mobile-close" @click="menuOpen=false" aria-label="Fechar menu">×</button></div>
+      <div class="sidebar-header"><img src="/static/app.png" alt="" class="brand-icon"><div><strong>NFS-e</strong><span>Codisplan · Fiscal</span></div><button class="mobile-close" @click="menuOpen=false" aria-label="Fechar menu">×</button></div>
       <div class="workspace-tag"><span class="status-dot"></span> Ambiente administrativo <span class="workspace-version">{{version}}</span></div>
       <nav class="nav" aria-label="Navegação principal"><div v-for="group in menuGroups" :key="group.title" class="menu-section"><div class="menu-title">{{group.title}}</div>
         <button v-for="item in group.items" :key="item.id" type="button" class="nav-item" :class="{active:page===item.id}" @click="go(item.id)"><span class="nav-icon">{{item.icon}}</span><span>{{item.label}}</span><span v-if="page===item.id" class="nav-caret">›</span></button>

@@ -20,6 +20,7 @@ USER root
 RUN python -m pip install --no-cache-dir pytest==9.0.2
 USER 10001:10001
 COPY --chown=10001:10001 tests/ tests/
+COPY --chown=10001:10001 desktop/ desktop/
 RUN python -m pytest -q
 
 FROM runtime AS final

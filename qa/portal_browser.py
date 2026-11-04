@@ -14,7 +14,7 @@ def check(screenshots:Path):
     html='<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><div id="app"></div></body></html>'
     mock=r'''window.fetch=async (path,opts)=>{
        const s=String(path); let data=[];
-       if(s.includes('/status'))data={product:'Codisplan NFS-e',configured:true,version:'0.2.0-dev.1.1'};
+       if(s.includes('/status'))data={product:'Codisplan NFS-e',configured:true,version:'0.3.0-dev.1.1'};
        else if(s.includes('/auth/me'))data={user:{id:1,name:'Operador Fiscal',email:'contato@example.test',role:'admin'},csrf:'qa-csrf',permissions:['dashboard','companies','certificates','sync','documents','reports','users','settings','audit']};
        else if(s.includes('/dashboard'))data={companies:3,invoices:1324,events:18,sync_runs:35,latest:[{id:2,company:'Empresa Exemplo',started_at:'2026-11-04T12:00:00Z',fetched:15,inserted:12,status:'CONCLUIDA'}]};
        else if(s.endsWith('/companies'))data=[{id:1,name:'Empresa Exemplo Ltda',identifier:'11222333000181',active:true}];
@@ -38,6 +38,11 @@ def check(screenshots:Path):
             for file in ('vue.js','render.js','app.js'):
                 page.add_script_tag(content=(PORTAL/file).read_text(encoding='utf-8'))
             page.get_by_text('Sincronizações recentes').wait_for(timeout=10000)
+            # about:blank test page cannot resolve absolute /static assets.
+            # Inject the real release icon so screenshot QA includes new branding.
+            import base64
+            img='data:image/png;base64,'+base64.b64encode((PORTAL/'app.png').read_bytes()).decode('ascii')
+            page.locator('img.brand-icon').evaluate('(node,src)=>node.src=src',img)
             page.screenshot(path=str(screenshots/(label+'-dashboard.png')),full_page=True)
             if label=='mobile':page.get_by_role('button',name='Abrir menu').click()
             page.get_by_role('button',name='Relatórios fiscais').click()

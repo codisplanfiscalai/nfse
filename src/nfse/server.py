@@ -1,4 +1,4 @@
-"""Main server for Windows GUI, Windows Service or Docker."""
+"""Main server for Windows desktop tray process or Docker."""
 from __future__ import annotations
 import os
 import uvicorn

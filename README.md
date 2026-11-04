@@ -1,12 +1,26 @@
 # Codisplan NFS-e — Gestão Fiscal
 
-**Reimplementação independente, Python 3.10+ / FastAPI / Vue 3 / Windows GUI + Service + Tray.**
+**Reimplementação independente, Python 3.10+ / FastAPI / Vue 3 / Windows GUI + Tray + FastAPI local.**
 
-> Versão-base **0.2.0**; a publicação só ocorre depois de testes, verificação dos artefatos nativos e PR conforme as regras do repositório. **A aplicação não é um serviço oficial do governo** e exige homologação com dados reais antes de uso em produção.
+> Versão-base **0.3.0**; a publicação só ocorre depois de testes, verificação dos artefatos nativos e PR conforme as regras do repositório. **A aplicação não é um serviço oficial do governo** e exige homologação com dados reais antes de uso em produção.
 
 ## Para o usuário do Windows
 
-Extraia o pacote Windows inteiro e abra `CodisplanNFSe.exe` com dois cliques. A janela de administração permite instalar o serviço com confirmação UAC, iniciar/parar, consultar o status, escolher a porta local e abrir o painel responsivo. O serviço continua funcionando quando a janela fecha e mantém o ícone na área de notificação (*System Tray*). **Nenhum terminal/CLI é necessário para utilização.** Não mova nem renomeie o diretório `_internal` incluído no pacote.
+Extraia o pacote Windows inteiro e abra `CodisplanNFSe.exe` com dois cliques. O próprio
+executável **inicia automaticamente a API FastAPI em 127.0.0.1:8765 e instala o ícone no
+System Tray**. Não instala serviço Windows, não apresenta UAC nem solicita CLI. A janela
+administra o portal com os botões **Iniciar, Interromper, Reiniciar e Abrir portal**.
+O fechamento pelo X ou ESC apenas recolhe a janela para o tray. **Sair do NFS-e** no
+menu do tray é a ação que interrompe o servidor e encerra o aplicativo.
+
+No primeiro uso pode ser escolhida outra porta em *Configuração local*; os dados são
+armazenados em `%LOCALAPPDATA%\Codisplan\NFSe`, sem privilégios de administrador.
+Não mova nem renomeie a pasta `_internal` distribuída com o executável.
+
+A identidade visual **NFS-e / Codisplan** é exclusiva desta aplicação, com símbolo
+próprio (trama N + conexão fiscal), paleta índigo noturno, violeta, turquesa e âmbar.
+O arquivo vetorial original está em `assets/nfse-mark.svg`, o gerador determinístico
+em `assets/create-brand.py` e as versões PNG/ICO são usadas no Windows e no portal Vue.
 
 No primeiro acesso, realize a configuração inicial com administrador local, cadastre CNPJ/CPF, importe e vincule o certificado A1 `.pfx/.p12`, e configure a URL HTTPS **oficial e verificada** do ADN Contribuinte. O Swagger fornecido não especifica `servers`; portanto **não existe endpoint de produção hardcoded ou inventado**. Sincronize por NSU e escolha relatório/período para PDF, Excel, CSV ou JSON.
 
@@ -19,7 +33,7 @@ A autenticação externa é **mTLS ICP-Brasil** com A1 validado na instalação 
 - Importação XML base64+gzip com controle de tamanho, integridade SHA-256, cursor NSU independente por empresa+certificado, persistência sem duplicação e projeção de cancelamento/substituição. Consultas avulsas **não** avançam o cursor de sincronização.
 - Relatórios: **emissão mensal, competência, ISS retido e canceladas/substituídas**, com filtros de período; PDFs e Excel em formato fiscal, sem incluir notas canceladas/substituídas no faturamento vigente.
 - Portal Vue 3 **compilado/vendorizado offline** com login, painel, empresas, certificados A1, sincronização, consulta por NSU, consulta por chave, documentos, relatórios, usuários, auditoria e configurações.
-- API interna autenticada, logs auditáveis, interface GUI Windows e serviço nativo em segundo plano.
+- API interna autenticada, logs auditáveis, interface GUI Windows com processo local em segundo plano gerenciado pelo tray.
 
 ## Ciclo de desenvolvimento e distribuição
 
@@ -27,19 +41,19 @@ A autenticação externa é **mTLS ICP-Brasil** com A1 validado na instalação 
 - `develop` integra trabalho validado através de PR `feat/*`, `fix/*`, `ci/*`, etc., com títulos Conventional Commits.
 - Versão de referência única em `VERSION` e `pyproject.toml`: `MAJOR.MINOR.PATCH` (SemVer 2.0).
 - Cada execução de pré-release no `develop` gera `MAJOR.MINOR.PATCH-dev.RUN.ATTEMPT` — sem tags reutilizadas. Após aprovação de testes e build, o workflow publica **os mesmos bytes validados** em GitHub Releases e GHCR.
-- `main` publica release estável SemVer, com verificações de procedência, hashes, Windows x86/x64, serviço, UI/ícone e contêiner.
+- `main` publica release estável SemVer, com verificações de procedência, hashes, Windows x86/x64, GUI+HTTP no tray, UI/ícone e contêiner.
 - Limpeza de caches restrita, com simulação e exclusão apenas elegível; nunca apagar tags ou artefatos para “consertar” versão.
 
 As rotinas técnicas para **desenvolvedores e CI** estão em `scripts/` e `winbundle/`. O usuário final não as utiliza.
 
 ## Instalação de desenvolvimento
 
-Arquivos de dependências estão fixados em `requirements-server.txt` e `winbundle/requirements-build.txt`; o frontend usa uma cópia local de Vue 3 e licença em `frontend/vendor/`. O backend é exposto apenas em `127.0.0.1` quando instalado como Windows Service. Para Docker, configure autenticação e um proxy TLS antes de expor em rede.
+Arquivos de dependências estão fixados em `requirements-server.txt` e `winbundle/requirements-build.txt`; o frontend usa uma cópia local de Vue 3 e licença em `frontend/vendor/`. O backend é exposto apenas em `127.0.0.1` pelo processo gráfico (sem serviço Windows). Para Docker, configure autenticação e um proxy TLS antes de expor em rede.
 
 Documentação detalhada em `docs/arquitetura.md`, `docs/relatorios.md`, `docs/fluxo-semver.md` e `docs/qualidade.md`.
 
 ## Limitações conhecidas
 
-O build Windows x86/x64, a integração real mTLS com ADN/ICP-Brasil, o comportamento do certificado A3 e a instalação em máquinas Windows específicas **dependem de testes nativos e homologação fiscal**. Os testes automatizados usam certificados e XMLs fictícios. As dependências diretas estão fixadas, mas ainda não há um lockfile transitive/hash completo reproduzível por plataforma; isto exige uma etapa adicional de hardening antes de uso corporativo.
+O build Windows x86/x64, a integração real mTLS com ADN/ICP-Brasil, o comportamento do certificado A3 e o gerenciamento de processos em máquinas Windows específicas **dependem de testes nativos e homologação fiscal**. Os testes automatizados usam certificados e XMLs fictícios. As dependências diretas estão fixadas, mas ainda não há um lockfile transitive/hash completo reproduzível por plataforma; isto exige uma etapa adicional de hardening antes de uso corporativo.
 
 Os relatórios são compatíveis **funcionalmente** com os quatro modelos enviados, mas não prometem reprodução idêntica de diagramação.

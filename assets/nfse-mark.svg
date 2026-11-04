@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Símbolo exclusivo Codisplan NFS-e">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#252967"/><stop offset="1" stop-color="#6858F3"/></linearGradient></defs>
+  <rect x="9" y="9" width="238" height="238" rx="58" fill="url(#g)"/>
+  <path d="M62 181 V75 L128 146 V75 L194 75 V181" fill="none" stroke="#FDFEFF" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M62 181 L128 109 L194 181" fill="none" stroke="#37D7C3" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="194" cy="75" r="22" fill="#FFB46B" stroke="#292A65" stroke-width="5"/>
+</svg>

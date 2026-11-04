@@ -11,15 +11,15 @@ var _Vue=Vue; var NFSeRender=function render(_ctx, _cache) {
           src: "/static/app.png",
           alt: "",
           class: "auth-icon"
-        }), _createElementVNode("span", null, [_createTextVNode("Codisplan "), _createElementVNode("strong", null, "NFS-e")])]), _createElementVNode("div", { class: "auth-message" }, [
+        }), _createElementVNode("span", null, [_createElementVNode("strong", null, "NFS-e"), _createTextVNode(" Codisplan")])]), _createElementVNode("div", { class: "auth-message" }, [
           _createElementVNode("p", { class: "eyebrow light" }, "PLATAFORMA FISCAL"),
           _createElementVNode("h1", null, "Documentos e relatórios. Em um só lugar."),
           _createElementVNode("p", null, "Sincronize documentos pelo Ambiente de Dados Nacional, acompanhe eventos e transforme XMLs em relatórios confiáveis."),
           _createElementVNode("div", { class: "auth-features" }, [_createElementVNode("span", null, "◈ Integração com certificado digital"), _createElementVNode("span", null, "◈ Histórico fiscal rastreável"), _createElementVNode("span", null, "◈ Relatórios por competência")])
         ]), _createElementVNode("div", { class: "auth-bottom" }, "CODISPLAN · TECNOLOGIA PARA CONTABILIDADE")]), _createElementVNode("main", { class: "auth-main" }, [_createElementVNode("section", { class: "auth-card" }, [
           _createElementVNode("img", {
-            src: "/static/logo.jpg",
-            alt: "Codisplan Contabilidade",
+            src: "/static/brand-lockup.png",
+            alt: "Codisplan NFS-e",
             class: "login-logo"
           }),
           _createElementVNode("p", { class: "eyebrow" }, "ACESSO SEGURO"),
@@ -82,7 +82,7 @@ var _Vue=Vue; var NFSeRender=function render(_ctx, _cache) {
             src: "/static/app.png",
             alt: "",
             class: "brand-icon"
-          }), _createElementVNode("div", null, [_createElementVNode("strong", null, "Codisplan"), _createElementVNode("span", null, "NFS-e • Administração")]), _createElementVNode("button", {
+          }), _createElementVNode("div", null, [_createElementVNode("strong", null, "NFS-e"), _createElementVNode("span", null, "Codisplan · Fiscal")]), _createElementVNode("button", {
             class: "mobile-close",
             onClick: $event => (menuOpen=false),
             "aria-label": "Fechar menu"

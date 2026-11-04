@@ -1,4 +1,4 @@
-"""Compile and verify Windows GUI + service independently using native PyInstaller."""
+"""Package the integrated Windows GUI + local HTTP runtime (no SCM service)."""
 from __future__ import annotations
 import argparse
 import hashlib
@@ -18,8 +18,8 @@ from version import read_version,validate_build
 from verify_artifacts import verify_pe,sha
 
 
-def command(*parts):
-    subprocess.run(list(map(str,parts)),cwd=ROOT,check=True)
+def command(*parts, timeout=None):
+    subprocess.run(list(map(str,parts)),cwd=ROOT,check=True,timeout=timeout)
 
 
 def create(arch,version):
@@ -36,24 +36,19 @@ def create(arch,version):
     common=[sys.executable,'-m','PyInstaller','--noconfirm','--clean','--onedir','--noupx',
             '--paths',str(ROOT),'--icon',str(ROOT/'assets/app.ico'),
             '--collect-submodules','uvicorn','--collect-submodules','cryptography',
-            '--collect-submodules','win32com','--hidden-import','win32timezone',
             '--distpath',str(target),'--workpath',str(ROOT/'build'/arch),
             '--specpath',str(ROOT/'build'/arch),*args]
     command(*common,'--windowed','--name','CodisplanNFSe',ROOT/'winbundle/desktop_entry.py')
-    command(*common,'--console','--name','CodisplanNFSeServico',ROOT/'winbundle/service_entry.py')
     bundle=target/'CodisplanNFSe'
-    service=target/'CodisplanNFSeServico'
-    shutil.copy2(service/'CodisplanNFSeServico.exe',bundle/'CodisplanNFSeServico.exe')
-    shutil.copytree(service/'_internal',bundle/'_internal',dirs_exist_ok=True)
     exe=bundle/'CodisplanNFSe.exe'
     verify_pe(exe.read_bytes(),arch,'gui')
-    verify_pe((bundle/'CodisplanNFSeServico.exe').read_bytes(),arch,'service')
     # Native GUI smoke exits automatically and records window/tray/console state.
     check_file=ROOT/'build'/arch/'smoke.json'
     os.environ['NFSE_SMOKE_STATUS_FILE']=str(check_file)
-    command(exe)
+    command(exe, timeout=45)
     status=json.loads(check_file.read_text(encoding='utf-8'))
-    if not status['tk_window'] or status['console_window'] or not status['tray_window']:
+    if (not status['tk_window'] or status['console_window'] or not status['tray_window']
+            or not status.get('http_ready') or not status.get('no_windows_service')):
         raise RuntimeError('GUI/Tray/console native smoke failed: '+str(status))
     del os.environ['NFSE_SMOKE_STATUS_FILE']
     from subprocess import check_output
@@ -66,13 +61,13 @@ def create(arch,version):
     manifest={'name':name,'version':version,'source_sha':sha_src,'architecture':arch,'windows_subsystem':'GUI',
               'identity':{'name':'Codisplan NFS-e','icon_sha256':sha((ROOT/'assets/app.ico').read_bytes()),
                           'embedded_pe_icons':'reviewed'},'smoke_test':'passed','files':files,
-              'python':platform.python_version(),'service':'CodisplanNFSe','fiscal_homologation':False}
+              'python':platform.python_version(),'service':'integrated-tray-process','fiscal_homologation':False}
     (bundle/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n',encoding='utf-8')
     output=ROOT/'artifacts';output.mkdir(exist_ok=True)
     archive=Path(shutil.make_archive(str(output/name),'zip',root_dir=target,base_dir='CodisplanNFSe'))
     (output/(name+'.sha256')).write_text(f'{sha(archive.read_bytes())}  {archive.name}\n',encoding='ascii')
     shutil.copy2(bundle/'manifest.json',output/(name+'.manifest.json'))
-    print('Windows GUI + service built:',archive)
+    print('Windows GUI + tray-managed HTTP built:',archive)
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--arch',choices=['x86','x64'],required=True);p.add_argument('--version',required=True)
