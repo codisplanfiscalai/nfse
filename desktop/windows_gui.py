@@ -309,6 +309,10 @@ def main() -> None:
                 'console_window': bool(check),
                 'http_ready': bool(runtime.active and probe(runtime.port)),
                 'no_windows_service': True,
+                'runtime_error': runtime.error[:600],
+                'runtime_running': runtime.running,
+                'runtime_started': runtime.active,
+                'runtime_port': runtime.port,
             }
             Path(smoke_file).write_text(json.dumps(result), encoding='utf-8')
             quit_all()
