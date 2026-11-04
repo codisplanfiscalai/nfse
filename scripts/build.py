@@ -24,7 +24,7 @@ def check():
     read_version()
     run('node','frontend/build.mjs','--check')
     run('node','--check',ROOT/'src/nfse/portal/app.js')
-    run(sys.executable,'-m','compileall','-q','src','desktop','packaging','scripts','tests')
+    run(sys.executable,'-m','compileall','-q','src','desktop','winbundle','scripts','tests')
     run(sys.executable,'-m','pytest','-q','tests')
     run(sys.executable,'-m','unittest','discover','-s','scripts/ci/tests','-v')
 
@@ -33,9 +33,9 @@ def windows(arch,version,install):
     if sys.platform!='win32':raise ValueError('O build Windows exige runner Windows nativo.')
     if install:
         run(sys.executable,'-m','pip','install','-r','requirements-server.txt')
-        run(sys.executable,'-m','pip','install','-r','packaging/requirements-build.txt')
+        run(sys.executable,'-m','pip','install','-r','winbundle/requirements-build.txt')
     check()
-    run(sys.executable,'packaging/build_windows.py','--arch',arch,'--version',version)
+    run(sys.executable,'winbundle/build_windows.py','--arch',arch,'--version',version)
 
 
 def container(version,no_cache):

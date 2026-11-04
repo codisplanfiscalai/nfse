@@ -8,7 +8,7 @@
 - **`src/nfse/reports.py`**: PDF/Excel/CSV, valores internos em centavos, cancelamentos segregados dos totais vigentes.
 - **`src/nfse/api.py`**: rotas REST autenticadas, cookie HttpOnly com CSRF para portal, bearer para integrações, auditoria e permissões.
 - **`src/nfse/portal/`**: frontend Vue 3 precompilado localmente; menus adaptáveis 1440px e 390px; identidade visual Codisplan.
-- **`desktop/` + `packaging/`**: Tk GUI e ícone Win32 Tray no processo de usuário; Windows Service separado, usando 127.0.0.1.
+- **`desktop/` + `winbundle/`**: Tk GUI e ícone Win32 Tray no processo de usuário; Windows Service separado, usando 127.0.0.1.
 
 ### Segurança
 

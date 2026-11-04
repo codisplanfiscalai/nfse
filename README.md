@@ -30,11 +30,11 @@ A autenticação externa é **mTLS ICP-Brasil** com A1 validado na instalação 
 - `main` publica release estável SemVer, com verificações de procedência, hashes, Windows x86/x64, serviço, UI/ícone e contêiner.
 - Limpeza de caches restrita, com simulação e exclusão apenas elegível; nunca apagar tags ou artefatos para “consertar” versão.
 
-As rotinas técnicas para **desenvolvedores e CI** estão em `scripts/` e `packaging/`. O usuário final não as utiliza.
+As rotinas técnicas para **desenvolvedores e CI** estão em `scripts/` e `winbundle/`. O usuário final não as utiliza.
 
 ## Instalação de desenvolvimento
 
-Arquivos de dependências estão fixados em `requirements-server.txt` e `packaging/requirements-build.txt`; o frontend usa uma cópia local de Vue 3 e licença em `frontend/vendor/`. O backend é exposto apenas em `127.0.0.1` quando instalado como Windows Service. Para Docker, configure autenticação e um proxy TLS antes de expor em rede.
+Arquivos de dependências estão fixados em `requirements-server.txt` e `winbundle/requirements-build.txt`; o frontend usa uma cópia local de Vue 3 e licença em `frontend/vendor/`. O backend é exposto apenas em `127.0.0.1` quando instalado como Windows Service. Para Docker, configure autenticação e um proxy TLS antes de expor em rede.
 
 Documentação detalhada em `docs/arquitetura.md`, `docs/relatorios.md`, `docs/fluxo-semver.md` e `docs/qualidade.md`.
 

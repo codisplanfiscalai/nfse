@@ -30,7 +30,7 @@ def select_caches(caches, now, days, pr_number=None):
 
 def local_candidates(root=ROOT):
     result = [root / name for name in ('build', 'dist', 'artifacts', '.pytest_cache', '.mypy_cache', '.ruff_cache')]
-    for area in ('src', 'tests', 'packaging', 'scripts'):
+    for area in ('src', 'tests', 'winbundle', 'scripts'):
         result += list((root / area).rglob('__pycache__'))
     safe = []
     tracked = set(subprocess.check_output(['git', 'ls-files'], cwd=root, text=True).splitlines())

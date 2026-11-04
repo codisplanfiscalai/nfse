@@ -39,8 +39,8 @@ def create(arch,version):
             '--collect-submodules','win32com','--hidden-import','win32timezone',
             '--distpath',str(target),'--workpath',str(ROOT/'build'/arch),
             '--specpath',str(ROOT/'build'/arch),*args]
-    command(*common,'--windowed','--name','CodisplanNFSe',ROOT/'packaging/desktop_entry.py')
-    command(*common,'--console','--name','CodisplanNFSeServico',ROOT/'packaging/service_entry.py')
+    command(*common,'--windowed','--name','CodisplanNFSe',ROOT/'winbundle/desktop_entry.py')
+    command(*common,'--console','--name','CodisplanNFSeServico',ROOT/'winbundle/service_entry.py')
     bundle=target/'CodisplanNFSe'
     service=target/'CodisplanNFSeServico'
     shutil.copy2(service/'CodisplanNFSeServico.exe',bundle/'CodisplanNFSeServico.exe')

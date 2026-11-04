@@ -14,7 +14,7 @@ from github_api import api, pages, repository
 from version import parse, validate_build, read_version
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / 'packaging'))
+sys.path.insert(0, str(ROOT / 'winbundle'))
 from verify_artifacts import verify
 from check_ghcr_visibility import check
 

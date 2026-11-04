@@ -43,7 +43,7 @@ jobs:
           path: |
             ${{ steps.paths.outputs.pip }}
             ${{ steps.paths.outputs.npm }}
-          key: codisplan-nfse-windows-${{ matrix.arch }}-deps-${{ hashFiles('requirements-server.txt', 'packaging/requirements-build.txt') }}
+          key: codisplan-nfse-windows-${{ matrix.arch }}-deps-${{ hashFiles('requirements-server.txt', 'winbundle/requirements-build.txt') }}
       - name: Build graphical executable and run native smoke
         env:
           BUILD_VERSION: ${{ inputs.version }}
@@ -72,4 +72,4 @@ jobs:
           merge-multiple: true
       - env:
           SOURCE_SHA: ${{ inputs.source_sha }}
-        run: python packaging/verify_artifacts.py verified-distributions --source-sha "$SOURCE_SHA"
+        run: python winbundle/verify_artifacts.py verified-distributions --source-sha "$SOURCE_SHA"

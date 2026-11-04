@@ -12,7 +12,7 @@ artifacts
 *.key
 .env
 assets/
-packaging/
+winbundle/
 qa/
 frontend/
 docs/
