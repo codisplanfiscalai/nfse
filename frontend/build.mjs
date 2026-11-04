@@ -9,7 +9,8 @@ const decode=s=>s.replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi, (_,
 const sandbox={console,document:{createElement(){return {textContent:'',get innerHTML(){return this.textContent;},set innerHTML(v){this.textContent=decode(v);this.children=[{getAttribute(){return decode(v.slice(10,-2))}}]}}}}};
 vm.createContext(sandbox);vm.runInContext(fs.readFileSync(path.join(dir,'vendor/vue.js'),'utf8'),sandbox);
 const errors=[];
-const render=sandbox.Vue.compile(fs.readFileSync(path.join(dir,'templates/app.html'),'utf8'),{hoistStatic:false,onError:e=>errors.push(String(e))});
+const template=fs.readFileSync(path.join(dir,'templates/app.html'),'utf8').replace(/\r\n?/g,'\n');
+const render=sandbox.Vue.compile(template,{hoistStatic:false,onError:e=>errors.push(String(e))});
 if(errors.length)throw Error(errors.join('\n'));
 const result='/* Vue 3 - template compilado offline */\nvar _Vue=Vue; var NFSeRender='+render.toString()+';\n';
 if(process.argv.includes('--check')){

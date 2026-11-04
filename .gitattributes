@@ -1,0 +1,15 @@
+# Generated Vue templates and scripts must be byte-identical on Linux/Windows.
+* text=auto eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.ico binary
+*.png binary
+*.jpg binary
+*.zip binary
+*.pdf binary
+*.xlsx binary
