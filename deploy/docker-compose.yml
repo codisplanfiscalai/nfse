@@ -1,0 +1,19 @@
+services:
+  codisplan-nfse:
+    image: ghcr.io/SEU_USUARIO/codisplan-nfse:develop
+    restart: unless-stopped
+    environment:
+      CODISPLAN_DATA_DIR: /var/lib/codisplan-nfse
+      CODISPLAN_MASTER_KEY: ${CODISPLAN_MASTER_KEY:?Configure uma chave Fernet no secret manager}
+      CODISPLAN_REQUIRE_EXTERNAL_KEY: "1"
+    ports:
+      - "127.0.0.1:8765:8765"
+    volumes:
+      - nfse-data:/var/lib/codisplan-nfse
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+volumes:
+  nfse-data:

@@ -1,0 +1,67 @@
+name: Windows GUI Service - EXE e releases
+on:
+  push:
+    branches: [develop]
+    tags: ['v*.*.*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install -r backend/requirements.txt pytest
+      - run: pytest -q
+  windows:
+    needs: test
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compilar painel Vue
+        working-directory: frontend
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+      - name: Instalar bibliotecas e compilar GUI
+        shell: pwsh
+        run: |
+          python -m pip install -r desktop/requirements-windows.txt
+          python -m PyInstaller --clean --noconfirm windows/CodisplanNFSe.spec
+          & .\dist\CodisplanNFSe\CodisplanNFSe.exe --self-test
+          if ($LASTEXITCODE -ne 0) { throw "Executavel Windows nao passou na verificacao interna" }
+          Copy-Item windows/README-USER.txt dist/CodisplanNFSe/LEIA-ME.txt
+          Compress-Archive -Path dist/CodisplanNFSe/* -DestinationPath CodisplanNFSe-Windows-x64.zip -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CodisplanNFSe-Windows-x64
+          path: CodisplanNFSe-Windows-x64.zip
+          if-no-files-found: error
+      - name: Publicar pre-release na develop
+        if: github.ref == 'refs/heads/develop'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION -Raw).Trim()
+          $tag = "v$version-dev.${{ github.run_number }}"
+          gh release create $tag CodisplanNFSe-Windows-x64.zip --prerelease --target develop --title "Pré-release $tag" --notes "Build contínuo da branch develop. Instalação pela GUI, sem CLI."
+      - name: Publicar release estável
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $version = (Get-Content VERSION -Raw).Trim()
+          if ("${{ github.ref_name }}" -ne "v$version") { throw "Tag divergente de VERSION" }
+          gh release create "${{ github.ref_name }}" CodisplanNFSe-Windows-x64.zip --title "Codisplan NFS-e ${{ github.ref_name }}" --notes "Release estável com serviço Windows e painel Vue."

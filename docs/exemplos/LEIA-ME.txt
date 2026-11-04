@@ -1,0 +1,4 @@
+DADOS FICTICIOS - SOMENTE DEMONSTRACAO DE LAYOUT
+
+Os arquivos PDF e Excel desta pasta foram produzidos com XML sintetico gerado para testes.
+Nao correspondem a notas fiscais validas, transacoes reais ou consultas homologadas ao ADN.
