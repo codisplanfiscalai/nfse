@@ -1,66 +1,45 @@
-# Codisplan NFS-e — API Python + GUI Windows + painel Vue 3
+# Codisplan NFS-e — Gestão Fiscal
 
-Sistema próprio de consulta do **ADN NFS-e**, armazenamento de documentos e eventos e emissão de quatro demonstrativos fiscais.
+**Reimplementação independente, Python 3.10+ / FastAPI / Vue 3 / Windows GUI + Service + Tray.**
 
-**O usuário opera tudo na interface gráfica: não há procedimento por terminal para baixar notas ou gerar relatórios.**
+> Versão-base **0.2.0**; a publicação só ocorre depois de testes, verificação dos artefatos nativos e PR conforme as regras do repositório. **A aplicação não é um serviço oficial do governo** e exige homologação com dados reais antes de uso em produção.
 
-## Aplicação Windows
+## Para o usuário do Windows
 
-Na página **Releases** do repositório GitHub, baixe `CodisplanNFSe-Windows-x64.zip`, extraia e abra `CodisplanNFSe.exe` com duplo clique. A janela tem botões para instalar, iniciar, parar, reiniciar ou remover o Serviço Windows (UAC solicita permissão administrativa). Ao fechar, o aplicativo fica na bandeja. O serviço autônomo pode continuar mesmo se o usuário sair da interface.
+Extraia o pacote Windows inteiro e abra `CodisplanNFSe.exe` com dois cliques. A janela de administração permite instalar o serviço com confirmação UAC, iniciar/parar, consultar o status, escolher a porta local e abrir o painel responsivo. O serviço continua funcionando quando a janela fecha e mantém o ícone na área de notificação (*System Tray*). **Nenhum terminal/CLI é necessário para utilização.** Não mova nem renomeie o diretório `_internal` incluído no pacote.
 
-Fluxo inicial: definir administrador → importar certificado A1 PFX/P12 → cadastrar empresa → vincular certificado → sincronizar → escolher período → gerar PDF/Excel/CSV. O servidor local é iniciado automaticamente se o serviço não estiver instalado; após instalar o serviço, ele assume a execução.
+No primeiro acesso, realize a configuração inicial com administrador local, cadastre CNPJ/CPF, importe e vincule o certificado A1 `.pfx/.p12`, e configure a URL HTTPS **oficial e verificada** do ADN Contribuinte. O Swagger fornecido não especifica `servers`; portanto **não existe endpoint de produção hardcoded ou inventado**. Sincronize por NSU e escolha relatório/período para PDF, Excel, CSV ou JSON.
 
-## Painel administrativo Vue 3
+A autenticação externa é **mTLS ICP-Brasil** com A1 validado na instalação local; o certificado é criptografado no armazenamento e não é publicado. O acesso por procuração e pelo mesmo CNPJ-base depende das autorizações do ADN. **A3 não foi implementado** — exige um adaptador PKCS#11/CSP e validação nativa.
 
-Visão geral, empresas, certificados, relatórios, XMLs, consultas do ADN, auditoria e configurações. Recursos acessados diretamente na janela nativa ou em `http://127.0.0.1:8765` no computador local. A interface não depende de CDN depois de compilada.
+## Recursos abrangidos
 
-## API oficial implementada
+- `GET /DFe/{NSU}`: parâmetro `NSU`, `lote` e os filtros mutuamente exclusivos `cnpjConsulta` / `cpfConsulta`, inclusive consulta própria e por procuração quando autorizada.
+- `GET /NFSe/{ChaveAcesso}/Eventos`: consulta de eventos da chave com preservação do XML e tipos de evento.
+- Importação XML base64+gzip com controle de tamanho, integridade SHA-256, cursor NSU independente por empresa+certificado, persistência sem duplicação e projeção de cancelamento/substituição. Consultas avulsas **não** avançam o cursor de sincronização.
+- Relatórios: **emissão mensal, competência, ISS retido e canceladas/substituídas**, com filtros de período; PDFs e Excel em formato fiscal, sem incluir notas canceladas/substituídas no faturamento vigente.
+- Portal Vue 3 **compilado/vendorizado offline** com login, painel, empresas, certificados A1, sincronização, consulta por NSU, consulta por chave, documentos, relatórios, usuários, auditoria e configurações.
+- API interna autenticada, logs auditáveis, interface GUI Windows e serviço nativo em segundo plano.
 
-- `GET /DFe/{NSU}`: lote, documento único, `cnpjConsulta`, `cpfConsulta`, procuração e CNPJ base (autorização avaliada pelo ADN).
-- `GET /NFSe/{ChaveAcesso}/Eventos`: eventos por chave de acesso.
-- mTLS com certificado **A1** em PKCS#12/PFX, TLS 1.2+, validação da cadeia do servidor.
-- GZip/Base64, XML seguro, dados originais criptografados, cursor NSU idempotente, eventos e cancelamentos.
-- Documentos: NFSE, EVENTO, DPS, CNC, PEDIDO_REGISTRO_EVENTO: todos armazenados. A normalização fiscal é aplicada a NFSE.
+## Ciclo de desenvolvimento e distribuição
 
-## Relatórios disponíveis
+- `main` contém versão estável e recebe apenas PR de `develop` no título `release(patch|minor|major): ...`.
+- `develop` integra trabalho validado através de PR `feat/*`, `fix/*`, `ci/*`, etc., com títulos Conventional Commits.
+- Versão de referência única em `VERSION` e `pyproject.toml`: `MAJOR.MINOR.PATCH` (SemVer 2.0).
+- Cada execução de pré-release no `develop` gera `MAJOR.MINOR.PATCH-dev.RUN.ATTEMPT` — sem tags reutilizadas. Após aprovação de testes e build, o workflow publica **os mesmos bytes validados** em GitHub Releases e GHCR.
+- `main` publica release estável SemVer, com verificações de procedência, hashes, Windows x86/x64, serviço, UI/ícone e contêiner.
+- Limpeza de caches restrita, com simulação e exclusão apenas elegível; nunca apagar tags ou artefatos para “consertar” versão.
 
-| Nome no painel | Base padrão | Filtro |
-|---|---|---|
-| Emitidas - Emissão | emissão | NFS-e autorizadas de serviços prestados |
-| Emitidas - Competência | competência | NFS-e autorizadas de serviços prestados |
-| ISS retido | emissão | Prestadas com indicador de retenção do ISS |
-| Canceladas/substituídas | emissão | Prestadas com cancelamento ou substituição efetiva |
+As rotinas técnicas para **desenvolvedores e CI** estão em `scripts/` e `winbundle/`. O usuário final não as utiliza.
 
-PDF A3 horizontal (repetição de cabeçalho em cada página), Excel com abas de tomador, serviço, competência, CSV e JSON.
-Os valores exibidos são extraídos dos XMLs. PIS/Cofins/CSLL retidos não são separados por inferência quando constam consolidados em `vRetCSLL`. ISS retido é informado pelo indicador documental, não calculado presumidamente sobre imposto apurado.
+## Instalação de desenvolvimento
 
-## Segurança
+Arquivos de dependências estão fixados em `requirements-server.txt` e `winbundle/requirements-build.txt`; o frontend usa uma cópia local de Vue 3 e licença em `frontend/vendor/`. O backend é exposto apenas em `127.0.0.1` quando instalado como Windows Service. Para Docker, configure autenticação e um proxy TLS antes de expor em rede.
 
-- API administrativa exige login. Primeiro acesso cria administrador local (senha com no mínimo 12 caracteres).
-- PFX e senha criptografados em repouso. No Windows, chave protegida por DPAPI e pasta com ACL de SYSTEM/Administrators após instalação.
-- Sem certificado de teste distribuído, sem senhas padrão; nenhuma rota pública de consulta fiscal.
-- O servidor Windows escuta em `127.0.0.1`. Não exponha porta 8765 externamente sem reverse proxy TLS, controle de acesso e revisão de segurança.
-- No Linux/Docker, use `CODISPLAN_MASTER_KEY` em secret manager e volume persistente. A imagem Docker é uma opção **separada** do aplicativo Windows.
-- Certificado **A3 ainda não implementado**: a camada de hardware CSP/PKCS#11 exige integração específica, e não equivale a importar PFX.
+Documentação detalhada em `docs/arquitetura.md`, `docs/relatorios.md`, `docs/fluxo-semver.md` e `docs/qualidade.md`.
 
-## Publicação em repositório novo
+## Limitações conhecidas
 
-Este projeto deve ser publicado em um repositório **exclusivo da API NFS-e**, sem misturar com outros sistemas fiscais. Primeiro crie o repositório vazio no GitHub; publique `main` e `develop` com o conteúdo integral deste pacote. Um push para `develop` acionará o GitHub Actions e produzirá o pacote `CodisplanNFSe-Windows-x64.zip` no ambiente Windows x64. Só declare o `.exe` pronto após o workflow terminar e o binário ser validado.
+O build Windows x86/x64, a integração real mTLS com ADN/ICP-Brasil, o comportamento do certificado A3 e a instalação em máquinas Windows específicas **dependem de testes nativos e homologação fiscal**. Os testes automatizados usam certificados e XMLs fictícios. As dependências diretas estão fixadas, mas ainda não há um lockfile transitive/hash completo reproduzível por plataforma; isto exige uma etapa adicional de hardening antes de uso corporativo.
 
-## Desenvolvimento, branches e versões
-
-`main`: releases estáveis em tags `vMAJOR.MINOR.PATCH`. `develop`: pré-releases contínuos `vMAJOR.MINOR.PATCH-dev.RUN_NUMBER`. O arquivo `VERSION` segue SemVer. GitHub Actions compila frontend, executa testes, gera ZIP Windows e publica release automaticamente. Imagem Docker é publicada no GHCR para as branches e tags.
-
-Este pacote contém **código-fonte com identidade visual original da Codisplan**, não um `.exe` Windows já compilado: o executável depende de PyInstaller rodando no próprio Windows (fluxo de GitHub Actions incluído).
-
-## Estado de homologação
-
-Testes automáticos com XML sintético e simulação de respostas ADN; comunicação real mTLS e dispositivo A3 não foram homologados com certificado de contribuinte. A distribuição do ADN depende de acesso autorizado e de ambiente com certificado válido. O caminho base de produção e restrita segue a documentação oficial e o Swagger fornecido.
-
-Fonte: <https://www.gov.br/nfse/pt-br/biblioteca/documentacao-tecnica/documentacao-atual>
-
-## Identidade visual
-
-A logomarca original fornecida pela Codisplan foi utilizada para gerar `assets/app.ico` (Windows EXE e tray), `assets/app.png` e `frontend/public/logo-mark.png`. O projeto também inclui `assets/codisplan_logo_original.jpg` como referência. Nenhum ícone substituto genérico foi empregado.
-
-**Importante:** este pacote não é um binário instalado ou compilado; a compilação nativa do Windows deve ocorrer em um runner Windows.
+Os relatórios são compatíveis **funcionalmente** com os quatro modelos enviados, mas não prometem reprodução idêntica de diagramação.
